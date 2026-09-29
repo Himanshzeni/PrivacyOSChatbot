@@ -1,0 +1,84 @@
+"use client";
+
+import React from "react";
+import { X, Sparkles, ShieldCheck } from "lucide-react";
+import { MessageList, MessageItem } from "./MessageList";
+import { MessageInput } from "./MessageInput";
+import { EnquiryButton } from "./EnquiryButton";
+
+interface ChatWindowProps {
+  isOpen: boolean;
+  onClose: () => void;
+  messages: MessageItem[];
+  isTyping: boolean;
+  conversationId: string;
+  onSendMessage: (text: string) => void;
+  onEnquiryClick: () => void;
+}
+
+export function ChatWindow({
+  isOpen,
+  onClose,
+  messages,
+  isTyping,
+  conversationId,
+  onSendMessage,
+  onEnquiryClick,
+}: ChatWindowProps) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed bottom-24 right-4 sm:right-8 z-50 w-[92vw] sm:w-[400px] h-[550px] max-h-[82vh] bg-white rounded-3xl shadow-2xl border border-[#12372A]/20 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
+      {/* Header */}
+      <div className="px-4 py-3.5 bg-[#12372A] text-white flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-full bg-[#A8E6CF] text-[#12372A] font-bold flex items-center justify-center">
+            <Sparkles className="w-4 h-4 text-[#12372A]" />
+          </div>
+          <div>
+            <div className="text-xs font-bold flex items-center gap-1.5">
+              <span>Smart Assistant</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            </div>
+            <div className="text-[10px] text-neutral-300 font-mono">
+              Website & DPDP Knowledge
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1">
+          <div className="px-2 py-0.5 rounded-full bg-white/10 text-[9px] text-neutral-200 flex items-center gap-1">
+            <ShieldCheck className="w-2.5 h-2.5 text-[#A8E6CF]" />
+            <span>DPDP Safe</span>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1 rounded-lg text-neutral-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            aria-label="Close Assistant"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Message List */}
+      <MessageList
+        messages={messages}
+        isTyping={isTyping}
+        onSoftEnquiryClick={onEnquiryClick}
+      />
+
+      {/* Always Visible Enquiry Button */}
+      <div className="px-3 pt-2 bg-white border-t border-neutral-100">
+        <EnquiryButton
+          conversationId={conversationId}
+          onEnquiryClick={onEnquiryClick}
+        />
+      </div>
+
+      {/* Message Input */}
+      <MessageInput onSendMessage={onSendMessage} disabled={isTyping} />
+    </div>
+  );
+}
