@@ -30,7 +30,7 @@ export async function retrieveRelevantKnowledge(query: string): Promise<Retrieve
   const normalizedQuery = query.toLowerCase();
 
   // 1. Check Approved DPDP Knowledge (Authoritative priority)
-  const isDpdpRelated = /(dpdp|data protection|consent|privacy|fiduciary|penalty|rights|personal data|fine|act 2023)/i.test(
+  const isDpdpRelated = /(dpdp|data protection|consent|privacy|fiduciary|penalty|rights|personal data|fine|act 2023|dpo|dpia|cross-border|transfer|children|minor|breach|cert-in)/i.test(
     normalizedQuery
   );
 

@@ -40,6 +40,14 @@ export const APPROVED_DPDP_KNOWLEDGE: LegalKnowledgeItem[] = [
     keywords: ["child", "children", "minor", "parental consent", "tracking", "advertising"],
   },
   {
+    section: "Section 10",
+    topic: "Additional Obligations of Significant Data Fiduciaries (SDF)",
+    citation: "Source: Digital Personal Data Protection Act, 2023 (Section 10)",
+    summary:
+      "Significant Data Fiduciaries designated by Central Government based on data volume and risk must: 1) Appoint an India-based Data Protection Officer (DPO) reporting directly to the Board of Directors, 2) Appoint an independent data auditor, 3) Undertake periodic Data Protection Impact Assessments (DPIA) and periodic compliance audits.",
+    keywords: ["sdf", "significant", "dpo", "data protection officer", "dpia", "audit", "auditor"],
+  },
+  {
     section: "Section 11, 12 & 13",
     topic: "Rights of the Data Principal (Access, Correction, Erasure & Grievance)",
     citation: "Source: Digital Personal Data Protection Act, 2023 (Sections 11-13)",
@@ -48,11 +56,19 @@ export const APPROVED_DPDP_KNOWLEDGE: LegalKnowledgeItem[] = [
     keywords: ["rights", "access", "erasure", "correction", "delete", "grievance", "complaint", "forgotten"],
   },
   {
+    section: "Section 16",
+    topic: "Cross-Border Transfer of Personal Data Outside India",
+    citation: "Source: Digital Personal Data Protection Act, 2023 (Section 16)",
+    summary:
+      "Cross-border transfer of personal data outside India is permitted to countries except those specifically blacklisted or restricted by the Central Government via official gazette notification, subject to sectoral rules (e.g. RBI data localization directives).",
+    keywords: ["cross-border", "transfer", "foreign", "outside india", "blacklisted", "localization", "international"],
+  },
+  {
     section: "Schedule & Penalties",
     topic: "Penalties for Non-Compliance",
     citation: "Source: Digital Personal Data Protection Act, 2023 (Schedule)",
     summary:
-      "Penalties are determined by the Data Protection Board of India based on severity. Failure to take reasonable security safeguards to prevent personal data breaches incurs penalties up to ₹250 Crores. Non-fulfillment of obligations in relation to children data incurs up to ₹200 Crores. Other general non-compliances incur up to ₹50 Crores.",
+      "Penalties are determined by the Data Protection Board of India based on severity: 1) Up to ₹250 Crores for failure to take reasonable security safeguards to prevent personal data breaches, 2) Up to ₹200 Crores for default in breach notification to the Board or Data Principals, 3) Up to ₹200 Crores for violation of children's data obligations (Section 9), 4) Up to ₹50 Crores for general non-compliances.",
     keywords: ["penalty", "fine", "crore", "punishment", "violation", "enforcement", "board"],
   },
 ];

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { X, Sparkles, ShieldCheck } from "lucide-react";
+import { X, Sparkles, ShieldCheck, RotateCcw } from "lucide-react";
 import { MessageList, MessageItem } from "./MessageList";
 import { MessageInput } from "./MessageInput";
 import { EnquiryButton } from "./EnquiryButton";
@@ -14,6 +14,7 @@ interface ChatWindowProps {
   conversationId: string;
   onSendMessage: (text: string) => void;
   onEnquiryClick: () => void;
+  onResetChat?: () => void;
 }
 
 export function ChatWindow({
@@ -24,24 +25,25 @@ export function ChatWindow({
   conversationId,
   onSendMessage,
   onEnquiryClick,
+  onResetChat,
 }: ChatWindowProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed bottom-24 right-4 sm:right-8 z-50 w-[92vw] sm:w-[400px] h-[550px] max-h-[82vh] bg-white rounded-3xl shadow-[0_20px_50px_rgba(15,23,42,0.25)] border border-[#E2E8F0] flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
+    <div className="fixed bottom-24 right-3 sm:right-8 z-50 w-[94vw] sm:w-[410px] h-[580px] max-h-[85vh] bg-white rounded-3xl shadow-[0_20px_60px_rgba(15,23,42,0.3)] border border-[#E2E8F0] flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
       {/* Header */}
       <div className="px-4 py-3.5 bg-gradient-to-r from-[#0F172A] via-[#1E293B] to-[#0F172A] text-white flex items-center justify-between shadow-sm border-b border-slate-800">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-[#1D4ED8] text-white font-bold flex items-center justify-center shadow-sm">
+          <div className="w-8 h-8 rounded-full bg-[#1D4ED8] text-white font-bold flex items-center justify-center shadow-sm shrink-0">
             <Sparkles className="w-4 h-4 text-blue-200" />
           </div>
           <div>
             <div className="text-xs font-bold flex items-center gap-1.5 text-white">
-              <span>Smart Assistant</span>
+              <span>PrivacyOS Assistant</span>
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             </div>
             <div className="text-[10px] text-slate-400 font-mono">
-              PrivacyOS & DPDP Knowledge
+              DPDP Act 2023 & Platform Verified
             </div>
           </div>
         </div>
@@ -51,9 +53,23 @@ export function ChatWindow({
             <ShieldCheck className="w-2.5 h-2.5 text-emerald-400" />
             <span>DPDP Safe</span>
           </div>
+
+          {onResetChat && (
+            <button
+              type="button"
+              onClick={onResetChat}
+              title="Reset conversation"
+              className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+              aria-label="Reset Conversation"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+            </button>
+          )}
+
           <button
             type="button"
             onClick={onClose}
+            title="Close"
             className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
             aria-label="Close Assistant"
           >
@@ -62,15 +78,16 @@ export function ChatWindow({
         </div>
       </div>
 
-      {/* Message List */}
+      {/* Message List with Interactive Chips and Markdown */}
       <MessageList
         messages={messages}
         isTyping={isTyping}
         onSoftEnquiryClick={onEnquiryClick}
+        onSelectPrompt={onSendMessage}
       />
 
-      {/* Always Visible Enquiry Button */}
-      <div className="px-3 pt-2 bg-white border-t border-neutral-100">
+      {/* Always Visible Fixed Enquiry Button */}
+      <div className="px-3 pt-2 pb-1 bg-white border-t border-[#E2E8F0]">
         <EnquiryButton
           conversationId={conversationId}
           onEnquiryClick={onEnquiryClick}

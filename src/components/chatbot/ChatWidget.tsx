@@ -104,6 +104,20 @@ export function ChatWidget() {
     router.push(`/enquiry?conversation_id=${encodeURIComponent(conversationId)}`);
   };
 
+  const handleResetChat = () => {
+    const newConvId = "conv_" + Math.random().toString(36).substring(2, 10);
+    sessionStorage.setItem("smart_assistant_conv_id", newConvId);
+    setConversationId(newConvId);
+    setMessages([
+      {
+        id: "initial_welcome",
+        role: "assistant",
+        content:
+          "Namaste! Main PrivacyOS Global ka Smart Assistant hoon. Aap hamare all-in-one DPDPA 2023 & GDPR compliance platform, consent management, DSR automation, Indian PII discovery (Aadhaar/PAN), ya May 2027 regulatory deadlines ke baare mein kuch bhi pooch sakte hain.",
+      },
+    ]);
+  };
+
   return (
     <>
       {/* Floating Chat Trigger Button */}
@@ -132,6 +146,7 @@ export function ChatWidget() {
         conversationId={conversationId}
         onSendMessage={handleSendMessage}
         onEnquiryClick={handleEnquiryRedirect}
+        onResetChat={handleResetChat}
       />
     </>
   );
