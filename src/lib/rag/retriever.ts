@@ -49,11 +49,29 @@ export async function retrieveRelevantKnowledge(query: string): Promise<Retrieve
     }
   }
 
-  // 2. Check Static/Structured Company Knowledge
+  // 2. Check Static/Structured Company Knowledge (PrivacyOS Global)
   for (const fact of DEFAULT_COMPANY_KNOWLEDGE) {
-    const words = fact.title.toLowerCase().split(/\s+/);
-    const matches = words.filter((w) => normalizedQuery.includes(w) && w.length > 3).length;
-    if (matches > 0 || normalizedQuery.includes(fact.category.toLowerCase())) {
+    const titleWords = fact.title.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
+    const contentText = fact.content.toLowerCase();
+
+    let matches = 0;
+    for (const w of titleWords) {
+      if (normalizedQuery.includes(w)) matches += 2;
+    }
+
+    const queryTokens = normalizedQuery.split(/\s+/).filter((w) => w.length > 3);
+    for (const token of queryTokens) {
+      if (contentText.includes(token)) matches += 1;
+    }
+
+    // Direct platform or company name matches
+    if (normalizedQuery.includes("privacyos") || normalizedQuery.includes("vexalix") || normalizedQuery.includes("platform")) {
+      if (fact.category === "OVERVIEW" || fact.category === "MODULES") {
+        matches += 2;
+      }
+    }
+
+    if (matches > 0) {
       results.push({
         category: "WEBSITE_KNOWLEDGE",
         title: fact.title,

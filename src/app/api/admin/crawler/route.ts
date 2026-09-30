@@ -21,22 +21,34 @@ export async function POST(req: Request) {
     const body = await req.json().catch(() => ({}));
     const pagesToCrawl = body.pages || [
       {
-        url: "/",
-        title: "Homepage - Curavia Fort Website Care",
+        url: "https://www.privacyosglobal.com/",
+        title: "PrivacyOS Global — India's All-in-One DPDPA & GDPR Compliance Platform",
         extractedText:
-          "Curavia Fort provides 24/7 proactive website maintenance, automated cloud backups, security monitoring, and DPDP-compliant automated AI support.",
+          "PrivacyOS Global by Vexalix Technology is an all-in-one DPDPA & GDPR compliance platform for Indian businesses. Automate consent capture, Indian PII discovery (Aadhaar, PAN, UPI), DSR fulfillment, breach response, and privacy assessments to stay 100% audit-ready before May 2027.",
       },
       {
-        url: "/services",
-        title: "Website Operations & Incident Response",
+        url: "https://www.privacyosglobal.com/services/consent-management",
+        title: "Consent & Cookie Management Module — 22 Scheduled Indian Languages",
         extractedText:
-          "Services include real-time synthetic uptime monitoring, malware removal, performance optimization, and 15-minute emergency SLA support.",
+          "Collect, manage, and demonstrate valid user consent across websites and apps. Features dynamic geolocation banners, tracker blocking, purpose-specific consent, native 22 Indian language support, and immutable cryptographic audit logs.",
       },
       {
-        url: "/enquiry",
-        title: "Official Website Enquiry Form",
+        url: "https://www.privacyosglobal.com/#modules",
+        title: "Platform Modules: DSR Automation, DPIA, Dual-Clock Breach Management",
         extractedText:
-          "Submit your website details to get a free health check and maintenance proposal within 2 hours.",
+          "Automate Data Principal Rights (access, correction, erasure) with OTP verification and SLA alerts. Fulfill mandatory DPIAs with 5x5 risk heatmaps. Manage breach incidents with dual-clock tracking: CERT-In 6-hour and DPDPA 72-hour reporting.",
+      },
+      {
+        url: "https://www.privacyosglobal.com/#timeline",
+        title: "Regulatory Transition Roadmap — Data Protection Board to May 2027 Deadline",
+        extractedText:
+          "India's 18-month phased rollout: Phase 1 active now with Data Protection Board live; Phase 2 in Nov 2026 for Consent Managers; Phase 3 hard enforcement deadline on 13 May 2027 with penalties up to ₹250 Crore per violation.",
+      },
+      {
+        url: "https://www.privacyosglobal.com/about",
+        title: "About PrivacyOS Global & Vexalix Technology Private Limited",
+        extractedText:
+          "Operated by Vexalix Technology Private Limited, headquartered at C-042C, 4th Floor, Supermart, DLF Phase IV, Gurugram, Haryana 122009. Hotline: +91 8887946496, Email: info@privacyosglobal.com.",
       },
     ];
 
