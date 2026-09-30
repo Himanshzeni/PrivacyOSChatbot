@@ -29,21 +29,25 @@ export async function retrieveRelevantKnowledge(query: string): Promise<Retrieve
   const results: RetrievedContextItem[] = [];
   const normalizedQuery = query.toLowerCase();
 
-  // 1. Check Approved DPDP Knowledge (Authoritative priority)
-  const isDpdpRelated = /(dpdp|data protection|consent|privacy|fiduciary|penalty|rights|personal data|fine|act 2023|dpo|dpia|cross-border|transfer|children|minor|breach|cert-in)/i.test(
+  // 1. Check Approved DPDP Knowledge from Gazette of India (Authoritative priority)
+  const isDpdpRelated = /(dpdp|data protection|consent|privacy|fiduciary|penalty|rights|personal data|fine|act 2023|dpo|dpia|cross-border|transfer|children|minor|breach|cert-in|section|sec\b|tdsat|board|nominate|schedule|grievance|notice|erasure|storage limitation)/i.test(
     normalizedQuery
   );
 
   if (isDpdpRelated) {
     for (const item of APPROVED_DPDP_KNOWLEDGE) {
       const matchScore = item.keywords.filter((kw) => normalizedQuery.includes(kw)).length;
-      if (matchScore > 0 || normalizedQuery.includes(item.section.toLowerCase())) {
+      const sectionMatch = normalizedQuery.includes(item.section.toLowerCase());
+      const topicWords = item.topic.toLowerCase().split(/\s+/).filter((w) => w.length > 3);
+      const topicMatches = topicWords.filter((w) => normalizedQuery.includes(w)).length;
+
+      if (matchScore > 0 || sectionMatch || topicMatches > 0) {
         results.push({
           category: "DPDP_KNOWLEDGE",
           title: `${item.section}: ${item.topic}`,
           content: item.summary,
           sourceCitation: item.citation,
-          score: 0.8 + matchScore * 0.05,
+          score: 0.8 + matchScore * 0.08 + (sectionMatch ? 0.25 : 0) + topicMatches * 0.05,
         });
       }
     }
