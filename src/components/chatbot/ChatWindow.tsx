@@ -28,33 +28,33 @@ export function ChatWindow({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed bottom-24 right-4 sm:right-8 z-50 w-[92vw] sm:w-[400px] h-[550px] max-h-[82vh] bg-white rounded-3xl shadow-2xl border border-[#12372A]/20 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
+    <div className="fixed bottom-24 right-4 sm:right-8 z-50 w-[92vw] sm:w-[400px] h-[550px] max-h-[82vh] bg-white rounded-3xl shadow-[0_20px_50px_rgba(15,23,42,0.25)] border border-[#E2E8F0] flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
       {/* Header */}
-      <div className="px-4 py-3.5 bg-[#12372A] text-white flex items-center justify-between shadow-sm">
+      <div className="px-4 py-3.5 bg-gradient-to-r from-[#0F172A] via-[#1E293B] to-[#0F172A] text-white flex items-center justify-between shadow-sm border-b border-slate-800">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-[#A8E6CF] text-[#12372A] font-bold flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-[#12372A]" />
+          <div className="w-8 h-8 rounded-full bg-[#1D4ED8] text-white font-bold flex items-center justify-center shadow-sm">
+            <Sparkles className="w-4 h-4 text-blue-200" />
           </div>
           <div>
-            <div className="text-xs font-bold flex items-center gap-1.5">
+            <div className="text-xs font-bold flex items-center gap-1.5 text-white">
               <span>Smart Assistant</span>
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             </div>
-            <div className="text-[10px] text-neutral-300 font-mono">
-              Website & DPDP Knowledge
+            <div className="text-[10px] text-slate-400 font-mono">
+              PrivacyOS & DPDP Knowledge
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-1">
-          <div className="px-2 py-0.5 rounded-full bg-white/10 text-[9px] text-neutral-200 flex items-center gap-1">
-            <ShieldCheck className="w-2.5 h-2.5 text-[#A8E6CF]" />
+          <div className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[9px] text-emerald-300 font-medium flex items-center gap-1">
+            <ShieldCheck className="w-2.5 h-2.5 text-emerald-400" />
             <span>DPDP Safe</span>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-lg text-neutral-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
             aria-label="Close Assistant"
           >
             <X className="w-4 h-4" />

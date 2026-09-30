@@ -111,15 +111,15 @@ export function ChatWidget() {
         <button
           type="button"
           onClick={handleToggle}
-          className="relative px-5 py-3.5 rounded-full bg-[#12372A] hover:bg-[#1a4a39] text-white shadow-2xl flex items-center gap-2.5 cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 border border-[#A8E6CF]/30 group"
+          className="relative px-5 py-3.5 rounded-full bg-[#1D4ED8] hover:bg-[#1E40AF] text-white shadow-[0_8px_25px_rgba(29,78,216,0.35)] flex items-center gap-2.5 cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 border border-blue-400/30 group"
           aria-label="Toggle Smart Assistant"
         >
           <div className="relative">
-            <MessageSquare className="w-5 h-5 text-[#A8E6CF]" />
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-[#12372A] animate-ping" />
+            <MessageSquare className="w-5 h-5 text-white" />
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full ring-2 ring-white animate-pulse" />
           </div>
           <span className="text-xs font-bold tracking-wide">Smart Assistant</span>
-          <Sparkles className="w-3.5 h-3.5 text-[#A8E6CF] group-hover:rotate-12 transition-transform" />
+          <Sparkles className="w-3.5 h-3.5 text-blue-200 group-hover:rotate-12 transition-transform" />
         </button>
       </div>
 
