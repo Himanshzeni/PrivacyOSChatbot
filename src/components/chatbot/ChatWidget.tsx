@@ -9,7 +9,7 @@ import { MessageItem } from "./MessageList";
 const INITIAL_WELCOME_MSG: MessageItem = {
   id: "initial_welcome",
   role: "assistant",
-  content: "Welcome to PrivacyOS Global",
+  content: "Welcome to PrivacyOS Global. Simplifying enterprise privacy & DPDP compliance.",
 };
 
 export function ChatWidget() {
@@ -34,6 +34,12 @@ export function ChatWidget() {
       try {
         const parsed = JSON.parse(savedMessages);
         if (Array.isArray(parsed) && parsed.length > 0) {
+          // If only initial welcome message is stored, ensure it has the latest text
+          if (parsed.length === 1 && parsed[0].id === "initial_welcome") {
+            setMessages([INITIAL_WELCOME_MSG]);
+            sessionStorage.setItem("smart_assistant_messages", JSON.stringify([INITIAL_WELCOME_MSG]));
+            return;
+          }
           setMessages(parsed);
           return;
         }
@@ -80,6 +86,7 @@ export function ChatWidget() {
 
     setMessages((prev) => [...prev, userMsg]);
     setIsTyping(true);
+    const startTime = Date.now();
 
     try {
       const res = await fetch("/api/chat", {
@@ -96,6 +103,13 @@ export function ChatWidget() {
       const botResponse =
         data.response || "Maaf kijiye, main is samay response generate nahi kar pa raha hoon.";
 
+      // Ensure at least a natural ~1.2s delay so assistant doesn't reply instantly
+      const elapsed = Date.now() - startTime;
+      const minDelay = 1200;
+      if (elapsed < minDelay) {
+        await new Promise((resolve) => setTimeout(resolve, minDelay - elapsed));
+      }
+
       const assistantMsg: MessageItem = {
         id: "assistant_" + Date.now(),
         role: "assistant",
@@ -107,6 +121,11 @@ export function ChatWidget() {
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (err) {
       console.error("[ChatWidget Error]:", err);
+      const elapsed = Date.now() - startTime;
+      const minDelay = 1000;
+      if (elapsed < minDelay) {
+        await new Promise((resolve) => setTimeout(resolve, minDelay - elapsed));
+      }
       setMessages((prev) => [
         ...prev,
         {
