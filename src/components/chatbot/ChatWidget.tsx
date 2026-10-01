@@ -103,9 +103,9 @@ export function ChatWidget() {
       const botResponse =
         data.response || "Maaf kijiye, main is samay response generate nahi kar pa raha hoon.";
 
-      // Ensure at least a natural ~1.2s delay so assistant doesn't reply instantly
+      // Ensure at least a natural 2-second gap before assistant replies
       const elapsed = Date.now() - startTime;
-      const minDelay = 1200;
+      const minDelay = 2000;
       if (elapsed < minDelay) {
         await new Promise((resolve) => setTimeout(resolve, minDelay - elapsed));
       }
@@ -122,7 +122,7 @@ export function ChatWidget() {
     } catch (err) {
       console.error("[ChatWidget Error]:", err);
       const elapsed = Date.now() - startTime;
-      const minDelay = 1000;
+      const minDelay = 2000;
       if (elapsed < minDelay) {
         await new Promise((resolve) => setTimeout(resolve, minDelay - elapsed));
       }
