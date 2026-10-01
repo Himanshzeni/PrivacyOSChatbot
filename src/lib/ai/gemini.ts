@@ -69,8 +69,8 @@ export class GeminiProvider implements AIProvider {
     if (key && key !== "your-gemini-api-key") {
       this.client = new GoogleGenerativeAI(key);
     }
-    this.primaryModel = modelName || process.env.GEMINI_MODEL || "gemini-3.5-flash";
-    this.fallbackModels = ["gemini-3.8-flash", "gemini-flash-latest"];
+    this.primaryModel = modelName || process.env.GEMINI_MODEL || "gemini-3.8-flash";
+    this.fallbackModels = ["gemini-3.5-flash", "gemini-flash-latest"];
   }
 
   async generateResponse(
