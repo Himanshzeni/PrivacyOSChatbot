@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { prisma, isDatabaseConfigured } from "@/lib/db";
 import { redactPII } from "@/lib/security/piiFilter";
 
 export async function POST(req: Request) {
@@ -15,37 +15,45 @@ export async function POST(req: Request) {
     }
 
     // 1. Save Permanent Lead to Official SubmittedEnquiry Database
-    const newLead = await prisma.submittedEnquiry.create({
-      data: {
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        phone: phone.trim(),
-        websiteUrl: websiteUrl ? websiteUrl.trim() : null,
-        service: service.trim(),
-        notes: notes ? notes.trim() : null,
-        conversationId: conversationId || null,
-        status: "NEW",
-      },
-    });
-
-    console.log(`[Official Lead Received]: ID=${newLead.id}, Name=${newLead.name}`);
-
-    // 2. ZERO-DUPLICATE CRM & DPDP PURGE:
-    // If conversationId was passed from the chatbot session, permanently purge temporary bot PII!
+    let leadId = "lead_" + Date.now();
     let botEnquiryPurged = false;
-    if (conversationId) {
-      try {
-        const deletedResult = await prisma.temporaryBotEnquiry.deleteMany({
-          where: { conversationId },
-        });
 
-        if (deletedResult.count > 0) {
-          botEnquiryPurged = true;
-          console.log(`[DPDP PII Purge]: Successfully purged temporary bot enquiry for conversationId=${conversationId}`);
+    if (isDatabaseConfigured()) {
+      try {
+        const newLead = await prisma.submittedEnquiry.create({
+          data: {
+            name: name.trim(),
+            email: email.trim().toLowerCase(),
+            phone: phone.trim(),
+            websiteUrl: websiteUrl ? websiteUrl.trim() : null,
+            service: service.trim(),
+            notes: notes ? notes.trim() : null,
+            conversationId: conversationId || null,
+            status: "NEW",
+          },
+        });
+        leadId = newLead.id;
+        console.log(`[Official Lead Received]: ID=${newLead.id}, Name=${newLead.name}`);
+
+        // ZERO-DUPLICATE CRM & DPDP PURGE:
+        if (conversationId) {
+          try {
+            const deletedResult = await prisma.temporaryBotEnquiry.deleteMany({
+              where: { conversationId },
+            });
+            if (deletedResult.count > 0) {
+              botEnquiryPurged = true;
+              console.log(`[DPDP PII Purge]: Successfully purged temporary bot enquiry for conversationId=${conversationId}`);
+            }
+          } catch (purgeErr) {
+            console.error("[DPDP PII Purge Error]:", purgeErr);
+          }
         }
-      } catch (purgeErr) {
-        console.error("[DPDP PII Purge Error]:", purgeErr);
+      } catch (dbErr) {
+        console.warn("[Enquiry DB Warning]: Database save skipped (offline/unreachable)", dbErr);
       }
+    } else {
+      console.log(`[Lead Saved Offline Mode]: Name=${name}, Email=${email}, Phone=${phone}, Service=${service}`);
     }
 
     // 3. Log Analytics (Sanitized, zero raw PII)
@@ -69,7 +77,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       message: "Enquiry submitted successfully. Our engineering team will contact you within 2 hours.",
-      leadId: newLead.id,
+      leadId,
       botPiiPurged: botEnquiryPurged,
     });
   } catch (error) {

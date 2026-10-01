@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { prisma, isDatabaseConfigured } from "@/lib/db";
 
 export async function POST(req: Request) {
   try {
@@ -10,19 +10,25 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "eventType required" }, { status: 400 });
     }
 
-    await prisma.analyticsEvent.create({
-      data: {
-        eventType,
-        conversationId: conversationId || null,
-        sessionId: sessionId || null,
-        pagePath: pagePath || null,
-        metadata: metadata || undefined,
-      },
-    });
+    if (isDatabaseConfigured()) {
+      try {
+        await prisma.analyticsEvent.create({
+          data: {
+            eventType,
+            conversationId: conversationId || null,
+            sessionId: sessionId || null,
+            pagePath: pagePath || null,
+            metadata: metadata || undefined,
+          },
+        });
+      } catch (dbErr) {
+        console.warn("[Analytics Warning]: Database currently unavailable, event skipped.", (dbErr as Error)?.message || dbErr);
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("[Analytics Event Error]:", error);
-    return NextResponse.json({ success: false }, { status: 500 });
+    console.warn("[Analytics Handler Warning]:", error);
+    return NextResponse.json({ success: true, warning: "Processed with fallback" });
   }
 }

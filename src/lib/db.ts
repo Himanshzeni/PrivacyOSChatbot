@@ -11,3 +11,10 @@ export const prisma =
   });
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+
+export function isDatabaseConfigured(): boolean {
+  const url = process.env.DATABASE_URL;
+  if (!url) return false;
+  if (url.includes("<username>") || url.includes("<password>")) return false;
+  return true;
+}

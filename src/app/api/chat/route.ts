@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { prisma, isDatabaseConfigured } from "@/lib/db";
 import { getAIProvider } from "@/lib/ai/provider";
 import { checkRateLimit } from "@/lib/security/rateLimit";
 import { validateInputSecurity } from "@/lib/security/injectionShield";
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     const sanitizedUserMessage = redactPII(message);
 
     // If voluntary contact details or requirements were shared, persist to TemporaryBotEnquiry
-    if (piiResult.hasPII) {
+    if (piiResult.hasPII && isDatabaseConfigured()) {
       try {
         const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24-hour TTL
 
@@ -117,22 +117,24 @@ export async function POST(req: Request) {
 
     // 9. Privacy-Sanitized Analytics Log (No PII)
     const latencyMs = Date.now() - startTime;
-    try {
-      await prisma.analyticsEvent.create({
-        data: {
-          eventType: "message_sent",
-          conversationId: convId,
-          intentType: intentResult.level,
-          tokensUsed,
-          latencyMs,
-          metadata: {
-            hasPiiRedacted: piiResult.hasPII,
-            matchedSourcesCount: retrievedContext.length,
+    if (isDatabaseConfigured()) {
+      try {
+        await prisma.analyticsEvent.create({
+          data: {
+            eventType: "message_sent",
+            conversationId: convId,
+            intentType: intentResult.level,
+            tokensUsed,
+            latencyMs,
+            metadata: {
+              hasPiiRedacted: piiResult.hasPII,
+              matchedSourcesCount: retrievedContext.length,
+            },
           },
-        },
-      });
-    } catch {
-      // Analytics non-blocking
+        });
+      } catch {
+        // Analytics non-blocking
+      }
     }
 
     return NextResponse.json({

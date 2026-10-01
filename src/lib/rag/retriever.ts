@@ -1,4 +1,4 @@
-import { prisma } from "../db";
+import { prisma, isDatabaseConfigured } from "../db";
 import { APPROVED_DPDP_KNOWLEDGE } from "../knowledge/dpdpKnowledge";
 import { DEFAULT_COMPANY_KNOWLEDGE } from "../knowledge/companyKnowledge";
 import { getAIProvider } from "../ai/provider";
@@ -86,32 +86,34 @@ export async function retrieveRelevantKnowledge(query: string): Promise<Retrieve
     }
   }
 
-  // 3. Database Chunks Vector / Hybrid Retrieval (if DB has stored knowledge chunks)
-  try {
-    const ai = getAIProvider();
-    const queryEmbedding = await ai.generateEmbeddings(query);
+  // 3. Database Chunks Vector / Hybrid Retrieval (if DB is configured and seeded)
+  if (isDatabaseConfigured()) {
+    try {
+      const ai = getAIProvider();
+      const queryEmbedding = await ai.generateEmbeddings(query);
 
-    const dbChunks = await prisma.knowledgeChunk.findMany({
-      take: 20,
-    });
+      const dbChunks = await prisma.knowledgeChunk.findMany({
+        take: 20,
+      });
 
-    for (const chunk of dbChunks) {
-      if (chunk.embedding && chunk.embedding.length > 0) {
-        const score = calculateCosineSimilarity(queryEmbedding, chunk.embedding);
-        if (score > 0.45) {
-          results.push({
-            category: chunk.category === "DPDP_LEGAL" ? "DPDP_KNOWLEDGE" : "WEBSITE_KNOWLEDGE",
-            title: chunk.title,
-            content: chunk.content,
-            sourceCitation: chunk.sourceCitation || "Source: Website Information",
-            score,
-          });
+      for (const chunk of dbChunks) {
+        if (chunk.embedding && chunk.embedding.length > 0) {
+          const score = calculateCosineSimilarity(queryEmbedding, chunk.embedding);
+          if (score > 0.45) {
+            results.push({
+              category: chunk.category === "DPDP_LEGAL" ? "DPDP_KNOWLEDGE" : "WEBSITE_KNOWLEDGE",
+              title: chunk.title,
+              content: chunk.content,
+              sourceCitation: chunk.sourceCitation || "Source: Website Information",
+              score,
+            });
+          }
         }
       }
+    } catch (dbErr) {
+      // If database is not yet seeded or offline, in-memory curated knowledge acts as flawless fallback
+      console.warn("[Retriever DB Chunk Warning]: Using curated baseline knowledge", dbErr);
     }
-  } catch (dbErr) {
-    // If database is not yet seeded or offline, in-memory curated knowledge acts as flawless fallback
-    console.warn("[Retriever DB Chunk Warning]: Using curated baseline knowledge", dbErr);
   }
 
   // Sort by score descending and take top 4 most relevant items
