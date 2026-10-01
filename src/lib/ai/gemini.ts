@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { AIProvider, AIResponse, ChatMessage } from "./types";
+import { findCuratedAnswer } from "../knowledge/popularQnA";
 
 function generateIntelligentFallback(userQuery: string, systemPrompt: string): string {
   const q = userQuery.toLowerCase().trim();
@@ -9,9 +10,10 @@ function generateIntelligentFallback(userQuery: string, systemPrompt: string): s
     return "Namaste! Main aapki DPDP compliance ya PrivacyOS platform ke baare mein kya madad kar sakta hoon?";
   }
 
-  // If asking what PrivacyOS is
-  if (q.includes("privacyos") && (q.includes("kya") || q.includes("what") || q.includes("about") || q.includes("kon"))) {
-    return "PrivacyOS Global ek enterprise data privacy aur compliance platform hai. Yeh companies ko DPDP Act 2023 compliance ke liye Consent Management, Indian PII Discovery (Aadhaar/PAN), DSR Automation aur Audit Assessments jaise solutions provide karta hai.";
+  // Check curated answers first (guarantees 100% complete, optimized, uncut reply)
+  const curated = findCuratedAnswer(userQuery);
+  if (curated) {
+    return curated;
   }
 
   // Extract retrieved context from systemPrompt
@@ -40,11 +42,16 @@ function generateIntelligentFallback(userQuery: string, systemPrompt: string): s
       .split("\n")
       .map((l) => l.trim())
       .filter((l) => l.length > 20 && !l.endsWith(":"))
-      .slice(0, 3)
       .join(" ");
 
+    // Split into complete sentences to avoid cutting words
+    const sentences = cleaned.match(/[^.!?]+[.!?]+/g);
+    if (sentences && sentences.length > 0) {
+      return sentences.slice(0, 2).map((s) => s.trim()).join(" ");
+    }
+
     if (cleaned.length > 30) {
-      return cleaned.slice(0, 350).trim();
+      return cleaned.trim();
     }
   }
 

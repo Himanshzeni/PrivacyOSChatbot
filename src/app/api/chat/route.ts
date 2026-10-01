@@ -8,6 +8,7 @@ import { retrieveRelevantKnowledge } from "@/lib/rag/retriever";
 import { buildOrchestratorPrompt } from "@/lib/rag/orchestrator";
 import { analyzeVisitorIntent } from "@/lib/intent/detector";
 import { ChatMessage } from "@/lib/ai/types";
+import { findCuratedAnswer } from "@/lib/knowledge/popularQnA";
 
 export async function POST(req: Request) {
   const startTime = Date.now();
@@ -96,9 +97,23 @@ export async function POST(req: Request) {
       content: sanitizedUserMessage,
     });
 
-    // 8. Generate AI Response via Abstracted Provider
-    const aiProvider = getAIProvider();
-    const aiResponse = await aiProvider.generateResponse(recentHistory, systemPrompt);
+    // 8. Generate AI Response via Abstracted Provider or Curated High-Precision Knowledge
+    let cleanResponseText = "";
+    let tokensUsed = 0;
+
+    const curatedAnswer = findCuratedAnswer(sanitizedUserMessage);
+    if (curatedAnswer) {
+      cleanResponseText = curatedAnswer;
+      tokensUsed = Math.round(curatedAnswer.length / 4);
+    } else {
+      const aiProvider = getAIProvider();
+      const aiResponse = await aiProvider.generateResponse(recentHistory, systemPrompt);
+      tokensUsed = aiResponse.tokensUsed || 0;
+      cleanResponseText = aiResponse.text
+        .replace(/\[Source:[^\]]*\]/gi, "")
+        .replace(/\[https?:\/\/[^\]]*\]/gi, "")
+        .trim();
+    }
 
     // 9. Privacy-Sanitized Analytics Log (No PII)
     const latencyMs = Date.now() - startTime;
@@ -108,7 +123,7 @@ export async function POST(req: Request) {
           eventType: "message_sent",
           conversationId: convId,
           intentType: intentResult.level,
-          tokensUsed: aiResponse.tokensUsed || 0,
+          tokensUsed,
           latencyMs,
           metadata: {
             hasPiiRedacted: piiResult.hasPII,
@@ -119,12 +134,6 @@ export async function POST(req: Request) {
     } catch {
       // Analytics non-blocking
     }
-
-    // Clean any remaining citation tags or bracketed sources
-    const cleanResponseText = aiResponse.text
-      .replace(/\[Source:[^\]]*\]/gi, "")
-      .replace(/\[https?:\/\/[^\]]*\]/gi, "")
-      .trim();
 
     return NextResponse.json({
       response: cleanResponseText,
