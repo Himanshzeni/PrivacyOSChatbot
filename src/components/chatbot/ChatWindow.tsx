@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { X, Sparkles, ShieldCheck } from "lucide-react";
+import { X, Sparkles } from "lucide-react";
 import { MessageList, MessageItem } from "./MessageList";
 import { MessageInput } from "./MessageInput";
 import { EnquiryButton } from "./EnquiryButton";
@@ -37,33 +37,20 @@ export function ChatWindow({
           <div className="w-8 h-8 rounded-full bg-[#1D4ED8] text-white font-bold flex items-center justify-center shadow-sm shrink-0">
             <Sparkles className="w-4 h-4 text-blue-200" />
           </div>
-          <div>
-            <div className="text-xs font-bold flex items-center gap-1.5 text-white">
-              <span>PrivacyOS Assistant</span>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            </div>
-            <div className="text-[10px] text-slate-400 font-mono">
-              DPDP Act 2023 & Platform Verified
-            </div>
-          </div>
+          <span className="text-sm font-semibold text-white">
+            PrivacyOS Global Assistant
+          </span>
         </div>
 
-        <div className="flex items-center gap-1">
-          <div className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[9px] text-emerald-300 font-medium flex items-center gap-1">
-            <ShieldCheck className="w-2.5 h-2.5 text-emerald-400" />
-            <span>DPDP Safe</span>
-          </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            title="Close"
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
-            aria-label="Close Assistant"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          title="Close"
+          className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+          aria-label="Close Assistant"
+        >
+          <X className="w-4 h-4" />
+        </button>
       </div>
 
       {/* Message List with Interactive Chips, Markdown & Questions Toggle */}
