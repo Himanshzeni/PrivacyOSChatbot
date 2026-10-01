@@ -15,8 +15,7 @@ export function ChatWidget() {
     {
       id: "initial_welcome",
       role: "assistant",
-      content:
-        "Namaste! Main PrivacyOS Global ka Smart Assistant hoon. Aap hamare all-in-one DPDPA 2023 & GDPR compliance platform, consent management, DSR automation, Indian PII discovery (Aadhaar/PAN), ya May 2027 regulatory deadlines ke baare mein kuch bhi pooch sakte hain.",
+      content: "Welcome to PrivacyOS Global",
     },
   ]);
 
@@ -112,8 +111,7 @@ export function ChatWidget() {
       {
         id: "initial_welcome",
         role: "assistant",
-        content:
-          "Namaste! Main PrivacyOS Global ka Smart Assistant hoon. Aap hamare all-in-one DPDPA 2023 & GDPR compliance platform, consent management, DSR automation, Indian PII discovery (Aadhaar/PAN), ya May 2027 regulatory deadlines ke baare mein kuch bhi pooch sakte hain.",
+        content: "Welcome to PrivacyOS Global",
       },
     ]);
   };
