@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { X, Sparkles, ShieldCheck, RotateCcw } from "lucide-react";
+import { X, Sparkles, ShieldCheck } from "lucide-react";
 import { MessageList, MessageItem } from "./MessageList";
 import { MessageInput } from "./MessageInput";
 import { EnquiryButton } from "./EnquiryButton";
@@ -54,18 +54,6 @@ export function ChatWindow({
             <span>DPDP Safe</span>
           </div>
 
-          {onResetChat && (
-            <button
-              type="button"
-              onClick={onResetChat}
-              title="Reset conversation"
-              className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
-              aria-label="Reset Conversation"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-            </button>
-          )}
-
           <button
             type="button"
             onClick={onClose}
@@ -78,24 +66,30 @@ export function ChatWindow({
         </div>
       </div>
 
-      {/* Message List with Interactive Chips and Markdown */}
+      {/* Message List with Interactive Chips, Markdown & Refresh Button */}
       <MessageList
         messages={messages}
         isTyping={isTyping}
         onSoftEnquiryClick={onEnquiryClick}
         onSelectPrompt={onSendMessage}
+        onResetChat={onResetChat}
       />
 
-      {/* Always Visible Fixed Enquiry Button */}
-      <div className="px-3 pt-2 pb-1 bg-white border-t border-[#E2E8F0]">
+      {/* Message Search / Input Bar (Replaced to be above Enquiry button) */}
+      <div className="border-t border-[#E2E8F0] bg-white">
+        <MessageInput onSendMessage={onSendMessage} disabled={isTyping} />
+      </div>
+
+      {/* Submit an Enquiry Button & Privacy Badge */}
+      <div className="px-3 pb-2.5 pt-0.5 bg-white space-y-1.5">
         <EnquiryButton
           conversationId={conversationId}
           onEnquiryClick={onEnquiryClick}
         />
+        <div className="text-[9px] text-center text-slate-400 font-mono">
+          PrivacyOS Shield Active • DPDP 2023 Compliant Session
+        </div>
       </div>
-
-      {/* Message Input */}
-      <MessageInput onSendMessage={onSendMessage} disabled={isTyping} />
     </div>
   );
 }

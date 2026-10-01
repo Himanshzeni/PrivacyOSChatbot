@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect } from "react";
-import { Bot, User, Sparkles, ChevronRight, HelpCircle } from "lucide-react";
+import { Bot, User, Sparkles, ChevronRight, HelpCircle, RotateCcw } from "lucide-react";
 
 export interface MessageItem {
   id: string;
@@ -16,6 +16,7 @@ interface MessageListProps {
   isTyping: boolean;
   onSoftEnquiryClick?: () => void;
   onSelectPrompt?: (prompt: string) => void;
+  onResetChat?: () => void;
 }
 
 const STARTER_PROMPTS = [
@@ -95,6 +96,7 @@ export function MessageList({
   isTyping,
   onSoftEnquiryClick,
   onSelectPrompt,
+  onResetChat,
 }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -139,8 +141,6 @@ export function MessageList({
                 <FormattedContent content={msg.content} />
               )}
 
-
-
               {/* Soft Enquiry Prompt if strongly detected */}
               {!isUser && msg.suggestSoftEnquiry && (
                 <div className="mt-2.5 pt-2 border-t border-blue-100 bg-[#F0F7FF] -mx-3 -mb-3 p-2.5 rounded-b-2xl">
@@ -184,6 +184,37 @@ export function MessageList({
               </button>
             ))}
           </div>
+
+          {/* Refresh Button placed in user's highlighted blue area */}
+          {onResetChat && (
+            <div className="flex justify-end pt-1 pr-0.5">
+              <button
+                type="button"
+                onClick={onResetChat}
+                title="Refresh compliance questions"
+                className="w-10 h-10 rounded-xl bg-white hover:bg-blue-50 text-[#1D4ED8] border-2 border-blue-400/80 hover:border-blue-600 shadow-sm transition-all cursor-pointer active:scale-90 flex items-center justify-center group"
+                aria-label="Refresh compliance questions"
+              >
+                <RotateCcw className="w-5 h-5 text-[#1D4ED8] group-hover:-rotate-180 transition-transform duration-300" />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Reset button when chatting so user can restore popular questions */}
+      {!showStarterChips && onResetChat && (
+        <div className="flex justify-end pt-1 pr-0.5">
+          <button
+            type="button"
+            onClick={onResetChat}
+            title="Reset conversation & questions"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-blue-50 text-[#1D4ED8] border border-blue-300 hover:border-blue-500 shadow-xs text-[11px] font-semibold transition-all cursor-pointer active:scale-95 group"
+            aria-label="Reset conversation"
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-[#1D4ED8] group-hover:-rotate-180 transition-transform duration-300" />
+            <span>New Chat</span>
+          </button>
         </div>
       )}
 

@@ -25,7 +25,7 @@ export function MessageInput({ onSendMessage, disabled = false }: MessageInputPr
   };
 
   return (
-    <div className="p-3 border-t border-[#E2E8F0] bg-white">
+    <div className="px-3 pt-3 pb-2 bg-white">
       <div className="flex items-center gap-2">
         <input
           type="text"
@@ -45,9 +45,6 @@ export function MessageInput({ onSendMessage, disabled = false }: MessageInputPr
         >
           <Send className="w-3.5 h-3.5 text-white" />
         </button>
-      </div>
-      <div className="pt-1.5 text-[9px] text-center text-slate-400 font-mono">
-        PrivacyOS Shield Active • DPDP 2023 Compliant Session
       </div>
     </div>
   );
