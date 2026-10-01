@@ -45,20 +45,22 @@ function generateIntelligentFallback(userQuery: string, systemPrompt: string): s
 export class GeminiProvider implements AIProvider {
   name = "gemini";
   private client: GoogleGenerativeAI | null = null;
-  private modelName: string;
+  private primaryModel: string;
+  private fallbackModels: string[];
 
-  constructor(apiKey?: string, modelName = "gemini-2.5-flash") {
+  constructor(apiKey?: string, modelName?: string) {
     const key = apiKey || process.env.GEMINI_API_KEY;
     if (key && key !== "your-gemini-api-key") {
       this.client = new GoogleGenerativeAI(key);
     }
-    this.modelName = modelName;
+    this.primaryModel = modelName || process.env.GEMINI_MODEL || "gemini-3.5-flash";
+    this.fallbackModels = ["gemini-3.8-flash", "gemini-flash-latest"];
   }
 
   async generateResponse(
     messages: ChatMessage[],
     systemPrompt: string,
-    temperature = 0.4
+    temperature = 0.2
   ): Promise<AIResponse> {
     const lastUserMsg = [...messages].reverse().find((m) => m.role === "user")?.content || "";
 
@@ -68,58 +70,64 @@ export class GeminiProvider implements AIProvider {
       return {
         text,
         tokensUsed: Math.round(text.length / 4),
-        model: this.modelName + "-verified-rag",
+        model: this.primaryModel + "-verified-rag",
       };
     }
 
-    try {
-      const model = this.client.getGenerativeModel({
-        model: this.modelName,
-        systemInstruction: systemPrompt,
-        generationConfig: {
-          temperature,
-          maxOutputTokens: 1024,
-        },
-      });
+    const candidateModels = [this.primaryModel, ...this.fallbackModels.filter((m) => m !== this.primaryModel)];
 
-      // Filter and map conversation history
-      const contents = messages
-        .filter((m) => m.role === "user" || m.role === "assistant")
-        .map((m) => ({
-          role: m.role === "assistant" ? "model" : "user",
-          parts: [{ text: m.content }],
-        }));
+    // Filter and map conversation history once
+    const contents = messages
+      .filter((m) => m.role === "user" || m.role === "assistant")
+      .map((m) => ({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: [{ text: m.content }],
+      }));
 
-      // If the last message is from user, generateContent
-      const lastMessage = contents.pop();
-      if (!lastMessage || lastMessage.role !== "user") {
-        throw new Error("Last message must be from user");
+    const lastMessage = contents.pop();
+    if (!lastMessage || lastMessage.role !== "user") {
+      throw new Error("Last message must be from user");
+    }
+
+    for (const modelToTry of candidateModels) {
+      try {
+        const model = this.client.getGenerativeModel({
+          model: modelToTry,
+          systemInstruction: systemPrompt,
+          generationConfig: {
+            temperature,
+            maxOutputTokens: 2048,
+          },
+        });
+
+        const chat = model.startChat({
+          history: contents,
+        });
+
+        const result = await chat.sendMessage(lastMessage.parts[0].text);
+        const response = await result.response;
+        const text = response.text()?.trim();
+        const tokensUsed = response.usageMetadata?.totalTokenCount || 0;
+
+        if (text) {
+          return {
+            text,
+            tokensUsed,
+            model: modelToTry,
+          };
+        }
+      } catch (err: unknown) {
+        console.warn(`[GeminiProvider] Model ${modelToTry} attempt failed:`, (err as Error)?.message || err);
       }
-
-      const chat = model.startChat({
-        history: contents,
-      });
-
-      const result = await chat.sendMessage(lastMessage.parts[0].text);
-      const response = await result.response;
-      const text = response.text();
-      const tokensUsed = response.usageMetadata?.totalTokenCount || 0;
-
-      return {
-        text,
-        tokensUsed,
-        model: this.modelName,
-      };
-    } catch (error) {
-      console.error("[GeminiProvider Error]:", error);
-      // Seamless degradation to verified local RAG response instead of crashing
-      const fallbackText = generateIntelligentFallback(lastUserMsg, systemPrompt);
-      return {
-        text: fallbackText,
-        tokensUsed: Math.round(fallbackText.length / 4),
-        model: this.modelName + "-fallback",
-      };
     }
+
+    // Seamless degradation to verified local RAG response instead of crashing
+    const fallbackText = generateIntelligentFallback(lastUserMsg, systemPrompt);
+    return {
+      text: fallbackText,
+      tokensUsed: Math.round(fallbackText.length / 4),
+      model: this.primaryModel + "-fallback-rag",
+    };
   }
 
   async generateEmbeddings(text: string): Promise<number[]> {
@@ -128,16 +136,23 @@ export class GeminiProvider implements AIProvider {
       return new Array(768).fill(0).map((_, i) => Math.sin(text.length + i) * 0.05);
     }
 
-    try {
-      const embeddingModel = this.client.getGenerativeModel({
-        model: "text-embedding-004",
-      });
+    const embeddingModels = ["gemini-embedding-001", "text-embedding-004"];
 
-      const result = await embeddingModel.embedContent(text);
-      return result.embedding.values;
-    } catch (error) {
-      console.error("[Gemini Embeddings Error]:", error);
-      return new Array(768).fill(0).map((_, i) => Math.sin(text.length + i) * 0.05);
+    for (const embModel of embeddingModels) {
+      try {
+        const model = this.client.getGenerativeModel({
+          model: embModel,
+        });
+
+        const result = await model.embedContent(text);
+        if (result.embedding?.values) {
+          return result.embedding.values;
+        }
+      } catch (error: unknown) {
+        console.warn(`[Gemini Embeddings] ${embModel} failed:`, (error as Error)?.message || error);
+      }
     }
+
+    return new Array(768).fill(0).map((_, i) => Math.sin(text.length + i) * 0.05);
   }
 }
