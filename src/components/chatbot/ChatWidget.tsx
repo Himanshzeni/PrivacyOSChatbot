@@ -6,30 +6,75 @@ import { useRouter } from "next/navigation";
 import { ChatWindow } from "./ChatWindow";
 import { MessageItem } from "./MessageList";
 
+const INITIAL_WELCOME_MSG: MessageItem = {
+  id: "initial_welcome",
+  role: "assistant",
+  content: "Welcome to PrivacyOS Global",
+};
+
 export function ChatWidget() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [conversationId, setConversationId] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [messages, setMessages] = useState<MessageItem[]>([
-    {
-      id: "initial_welcome",
-      role: "assistant",
-      content: "Welcome to PrivacyOS Global",
-    },
-  ]);
+  const [messages, setMessages] = useState<MessageItem[]>([INITIAL_WELCOME_MSG]);
 
-  // Initialize or restore session-only conversation_id
+  // Initialize or restore session-only conversation & messages
+  // Resets only if the user refreshes/reloads the browser
   useEffect(() => {
+    let isReload = false;
+    try {
+      if (typeof window !== "undefined" && window.performance) {
+        const navEntries = window.performance.getEntriesByType("navigation");
+        if (navEntries.length > 0) {
+          isReload = (navEntries[0] as PerformanceNavigationTiming).type === "reload";
+        } else if (
+          (window.performance as unknown as { navigation?: { type: number } }).navigation?.type === 1
+        ) {
+          isReload = true;
+        }
+      }
+    } catch {
+      isReload = false;
+    }
+
+    if (isReload) {
+      // Browser refreshed: Clear previous session chat history
+      sessionStorage.removeItem("smart_assistant_messages");
+      sessionStorage.removeItem("smart_assistant_conv_id");
+    }
+
     let convId = sessionStorage.getItem("smart_assistant_conv_id");
     if (!convId) {
       convId = "conv_" + Math.random().toString(36).substring(2, 10);
       sessionStorage.setItem("smart_assistant_conv_id", convId);
     }
-    queueMicrotask(() => {
-      setConversationId(convId);
-    });
+    setConversationId(convId);
+
+    const savedMessages = sessionStorage.getItem("smart_assistant_messages");
+    if (savedMessages) {
+      try {
+        const parsed = JSON.parse(savedMessages);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setMessages(parsed);
+          return;
+        }
+      } catch {
+        // ignore parse error
+      }
+    }
+
+    // New session: show Welcome message exactly once
+    setMessages([INITIAL_WELCOME_MSG]);
+    sessionStorage.setItem("smart_assistant_messages", JSON.stringify([INITIAL_WELCOME_MSG]));
   }, []);
+
+  // Sync messages to sessionStorage during the session
+  useEffect(() => {
+    if (typeof window !== "undefined" && messages.length > 0) {
+      sessionStorage.setItem("smart_assistant_messages", JSON.stringify(messages));
+    }
+  }, [messages]);
 
   const handleToggle = () => {
     const nextState = !isOpen;
@@ -107,13 +152,8 @@ export function ChatWidget() {
     const newConvId = "conv_" + Math.random().toString(36).substring(2, 10);
     sessionStorage.setItem("smart_assistant_conv_id", newConvId);
     setConversationId(newConvId);
-    setMessages([
-      {
-        id: "initial_welcome",
-        role: "assistant",
-        content: "Welcome to PrivacyOS Global",
-      },
-    ]);
+    setMessages([INITIAL_WELCOME_MSG]);
+    sessionStorage.setItem("smart_assistant_messages", JSON.stringify([INITIAL_WELCOME_MSG]));
   };
 
   return (

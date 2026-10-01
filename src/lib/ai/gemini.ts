@@ -6,7 +6,7 @@ function generateIntelligentFallback(userQuery: string, systemPrompt: string): s
 
   // If greeting
   if (/^(hi|hello|hey|namaste|hlo|greetings)\b/i.test(q)) {
-    return "Namaste! Main PrivacyOS Global ka Smart Assistant hoon. Aap hamari services ya DPDP Act compliance ke baare mein kuch bhi pooch sakte hain.";
+    return "Namaste! Main aapki DPDP compliance ya PrivacyOS platform ke baare mein kya madad kar sakta hoon?";
   }
 
   // If asking what PrivacyOS is
