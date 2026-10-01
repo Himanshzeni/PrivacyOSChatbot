@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { Bot, User, Sparkles, ChevronRight, HelpCircle, RotateCcw } from "lucide-react";
 
 export interface MessageItem {
@@ -96,15 +96,20 @@ export function MessageList({
   isTyping,
   onSoftEnquiryClick,
   onSelectPrompt,
-  onResetChat,
 }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const [showQuestions, setShowQuestions] = useState(true);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isTyping]);
+  }, [messages, isTyping, showQuestions]);
 
-  const showStarterChips = messages.length <= 1 && onSelectPrompt;
+  const handleSelectQuestion = (prompt: string) => {
+    if (onSelectPrompt) {
+      onSelectPrompt(prompt);
+      setShowQuestions(false);
+    }
+  };
 
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs bg-[#F8FAFC]">
@@ -164,19 +169,21 @@ export function MessageList({
         );
       })}
 
-      {/* Quick Interactive Prompt Chips */}
-      {showStarterChips && (
+      {/* Popular Compliance Questions Section */}
+      {showQuestions && onSelectPrompt && (
         <div className="pt-2 pb-1 space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="text-[10px] font-semibold text-slate-500 flex items-center gap-1 px-1">
-            <HelpCircle className="w-3 h-3 text-[#1D4ED8]" />
-            <span>Popular compliance questions:</span>
+          <div className="text-[10px] font-semibold text-slate-500 flex items-center justify-between px-1">
+            <div className="flex items-center gap-1">
+              <HelpCircle className="w-3 h-3 text-[#1D4ED8]" />
+              <span>Popular compliance questions:</span>
+            </div>
           </div>
           <div className="flex flex-col gap-1.5">
             {STARTER_PROMPTS.map((prompt, idx) => (
               <button
                 key={idx}
                 type="button"
-                onClick={() => onSelectPrompt(prompt.replace(/^[^a-zA-Z0-9]+/, "").trim())}
+                onClick={() => handleSelectQuestion(prompt.replace(/^[^a-zA-Z0-9]+/, "").trim())}
                 className="text-left px-3 py-2 rounded-xl bg-white hover:bg-blue-50/80 border border-[#E2E8F0] hover:border-blue-300 text-[11px] text-[#0F172A] font-medium transition-all shadow-xs flex items-center justify-between group cursor-pointer active:scale-[0.99]"
               >
                 <span>{prompt}</span>
@@ -185,35 +192,32 @@ export function MessageList({
             ))}
           </div>
 
-          {/* Refresh Button placed in user's highlighted blue area */}
-          {onResetChat && (
-            <div className="flex justify-end pt-1 pr-0.5">
-              <button
-                type="button"
-                onClick={onResetChat}
-                title="Refresh compliance questions"
-                className="w-10 h-10 rounded-xl bg-white hover:bg-blue-50 text-[#1D4ED8] border-2 border-blue-400/80 hover:border-blue-600 shadow-sm transition-all cursor-pointer active:scale-90 flex items-center justify-center group"
-                aria-label="Refresh compliance questions"
-              >
-                <RotateCcw className="w-5 h-5 text-[#1D4ED8] group-hover:-rotate-180 transition-transform duration-300" />
-              </button>
-            </div>
-          )}
+          {/* Toggle/Close Questions Button placed in user's highlighted blue area */}
+          <div className="flex justify-end pt-1 pr-0.5">
+            <button
+              type="button"
+              onClick={() => setShowQuestions(false)}
+              title="Hide compliance questions"
+              className="w-10 h-10 rounded-xl bg-white hover:bg-blue-50 text-[#1D4ED8] border-2 border-blue-400/80 hover:border-blue-600 shadow-sm transition-all cursor-pointer active:scale-90 flex items-center justify-center group"
+              aria-label="Hide compliance questions"
+            >
+              <RotateCcw className="w-5 h-5 text-[#1D4ED8] group-hover:-rotate-180 transition-transform duration-300" />
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Reset button when chatting so user can restore popular questions */}
-      {!showStarterChips && onResetChat && (
+      {/* Button to re-open/show compliance questions when they are collapsed */}
+      {!showQuestions && onSelectPrompt && (
         <div className="flex justify-end pt-1 pr-0.5">
           <button
             type="button"
-            onClick={onResetChat}
-            title="Reset conversation & questions"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-blue-50 text-[#1D4ED8] border border-blue-300 hover:border-blue-500 shadow-xs text-[11px] font-semibold transition-all cursor-pointer active:scale-95 group"
-            aria-label="Reset conversation"
+            onClick={() => setShowQuestions(true)}
+            title="Ask another compliance question from the list"
+            className="w-10 h-10 rounded-xl bg-white hover:bg-blue-50 text-[#1D4ED8] border-2 border-blue-400/80 hover:border-blue-600 shadow-sm transition-all cursor-pointer active:scale-90 flex items-center justify-center group"
+            aria-label="Show compliance questions"
           >
-            <RotateCcw className="w-3.5 h-3.5 text-[#1D4ED8] group-hover:-rotate-180 transition-transform duration-300" />
-            <span>New Chat</span>
+            <RotateCcw className="w-5 h-5 text-[#1D4ED8] group-hover:-rotate-180 transition-transform duration-300" />
           </button>
         </div>
       )}

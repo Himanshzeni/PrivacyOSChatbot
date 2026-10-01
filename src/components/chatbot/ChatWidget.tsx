@@ -20,30 +20,8 @@ export function ChatWidget() {
   const [messages, setMessages] = useState<MessageItem[]>([INITIAL_WELCOME_MSG]);
 
   // Initialize or restore session-only conversation & messages
-  // Resets only if the user refreshes/reloads the browser
+  // Persists throughout the visit until the user leaves the website
   useEffect(() => {
-    let isReload = false;
-    try {
-      if (typeof window !== "undefined" && window.performance) {
-        const navEntries = window.performance.getEntriesByType("navigation");
-        if (navEntries.length > 0) {
-          isReload = (navEntries[0] as PerformanceNavigationTiming).type === "reload";
-        } else if (
-          (window.performance as unknown as { navigation?: { type: number } }).navigation?.type === 1
-        ) {
-          isReload = true;
-        }
-      }
-    } catch {
-      isReload = false;
-    }
-
-    if (isReload) {
-      // Browser refreshed: Clear previous session chat history
-      sessionStorage.removeItem("smart_assistant_messages");
-      sessionStorage.removeItem("smart_assistant_conv_id");
-    }
-
     let convId = sessionStorage.getItem("smart_assistant_conv_id");
     if (!convId) {
       convId = "conv_" + Math.random().toString(36).substring(2, 10);
@@ -64,7 +42,7 @@ export function ChatWidget() {
       }
     }
 
-    // New session: show Welcome message exactly once
+    // New visit: show Welcome message
     setMessages([INITIAL_WELCOME_MSG]);
     sessionStorage.setItem("smart_assistant_messages", JSON.stringify([INITIAL_WELCOME_MSG]));
   }, []);

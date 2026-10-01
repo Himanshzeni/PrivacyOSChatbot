@@ -66,13 +66,12 @@ export function ChatWindow({
         </div>
       </div>
 
-      {/* Message List with Interactive Chips, Markdown & Refresh Button */}
+      {/* Message List with Interactive Chips, Markdown & Questions Toggle */}
       <MessageList
         messages={messages}
         isTyping={isTyping}
         onSoftEnquiryClick={onEnquiryClick}
         onSelectPrompt={onSendMessage}
-        onResetChat={onResetChat}
       />
 
       {/* Message Search / Input Bar (Replaced to be above Enquiry button) */}
