@@ -98,7 +98,19 @@ export function MessageList({
   onSelectPrompt,
 }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
-  const [showQuestions, setShowQuestions] = useState(true);
+  const [userToggledQuestions, setUserToggledQuestions] = useState<boolean | null>(null);
+
+  // 1st time only: questions show initially when there are no user messages (messages.length <= 1)
+  // Once a user sends/types a message, questions disappear from the chat box unless user clicks the refresh button
+  const isInitialVisit = messages.length <= 1;
+  const showQuestions = userToggledQuestions !== null ? userToggledQuestions : isInitialVisit;
+
+  // Whenever a new message is added while chatting, hide questions so chat remains clean
+  useEffect(() => {
+    if (messages.length > 1) {
+      setUserToggledQuestions(false);
+    }
+  }, [messages.length]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -106,8 +118,8 @@ export function MessageList({
 
   const handleSelectQuestion = (prompt: string) => {
     if (onSelectPrompt) {
+      setUserToggledQuestions(false);
       onSelectPrompt(prompt);
-      setShowQuestions(false);
     }
   };
 
@@ -196,7 +208,7 @@ export function MessageList({
           <div className="flex justify-end pt-1 pr-0.5">
             <button
               type="button"
-              onClick={() => setShowQuestions(false)}
+              onClick={() => setUserToggledQuestions(false)}
               title="Hide compliance questions"
               className="w-10 h-10 rounded-xl bg-white hover:bg-blue-50 text-[#1D4ED8] border-2 border-blue-400/80 hover:border-blue-600 shadow-sm transition-all cursor-pointer active:scale-90 flex items-center justify-center group"
               aria-label="Hide compliance questions"
@@ -212,7 +224,7 @@ export function MessageList({
         <div className="flex justify-end pt-1 pr-0.5">
           <button
             type="button"
-            onClick={() => setShowQuestions(true)}
+            onClick={() => setUserToggledQuestions(true)}
             title="Ask another compliance question from the list"
             className="w-10 h-10 rounded-xl bg-white hover:bg-blue-50 text-[#1D4ED8] border-2 border-blue-400/80 hover:border-blue-600 shadow-sm transition-all cursor-pointer active:scale-90 flex items-center justify-center group"
             aria-label="Show compliance questions"
