@@ -6,7 +6,12 @@ function generateIntelligentFallback(userQuery: string, systemPrompt: string): s
 
   // If greeting
   if (/^(hi|hello|hey|namaste|hlo|greetings)\b/i.test(q)) {
-    return "Namaste! Main PrivacyOS Global ka Smart Assistant hoon. Aap hamare all-in-one DPDPA 2023 compliance platform, consent management, Indian PII discovery (Aadhaar/PAN), DSR automation, ya May 2027 regulatory roadmap ke baare mein kuch bhi pooch sakte hain.";
+    return "Namaste! Main PrivacyOS Global ka Smart Assistant hoon. Aap hamari services ya DPDP Act compliance ke baare mein kuch bhi pooch sakte hain.";
+  }
+
+  // If asking what PrivacyOS is
+  if (q.includes("privacyos") && (q.includes("kya") || q.includes("what") || q.includes("about") || q.includes("kon"))) {
+    return "PrivacyOS Global ek enterprise data privacy aur compliance platform hai. Yeh companies ko DPDP Act 2023 compliance ke liye Consent Management, Indian PII Discovery (Aadhaar/PAN), DSR Automation aur Audit Assessments jaise solutions provide karta hai.";
   }
 
   // Extract retrieved context from systemPrompt
@@ -19,27 +24,31 @@ function generateIntelligentFallback(userQuery: string, systemPrompt: string): s
     ?.split("---")[0]
     ?.trim();
 
-  const sections: string[] = [];
-
-  if (
-    websitePart &&
-    !websitePart.includes("No specific website knowledge retrieved")
-  ) {
-    sections.push(websitePart);
+  let rawContext = "";
+  if (websitePart && !websitePart.includes("No specific website knowledge retrieved")) {
+    rawContext += websitePart + "\n";
+  }
+  if (dpdpPart && !dpdpPart.includes("No specific DPDP legal context retrieved")) {
+    rawContext += dpdpPart + "\n";
   }
 
-  if (
-    dpdpPart &&
-    !dpdpPart.includes("No specific DPDP legal context retrieved")
-  ) {
-    sections.push(dpdpPart);
+  if (rawContext) {
+    // Clean out citations and markdown headers
+    const cleaned = rawContext
+      .replace(/\[Source:[^\]]*\]/gi, "")
+      .replace(/https?:\/\/\S+/gi, "")
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l.length > 20 && !l.endsWith(":"))
+      .slice(0, 3)
+      .join(" ");
+
+    if (cleaned.length > 30) {
+      return cleaned.slice(0, 350).trim();
+    }
   }
 
-  if (sections.length > 0) {
-    return sections.join("\n\n");
-  }
-
-  return "Mere paas iske baare mein verified information available nahi hai. Agar aap PrivacyOS Global ke compliance platform ya audit assessment ke baare mein detail mein jaanna chahte hain, toh aap neeche diye gaye 'Submit an Enquiry →' option ka use kar sakte hain.";
+  return "Mere paas iske baare mein verified information nahi hai. Aap detail jankari ke liye website par 'Submit an Enquiry →' par click kar sakte hain.";
 }
 
 export class GeminiProvider implements AIProvider {
@@ -106,10 +115,11 @@ export class GeminiProvider implements AIProvider {
 
         const result = await chat.sendMessage(lastMessage.parts[0].text);
         const response = await result.response;
-        const text = response.text()?.trim();
+        let text = response.text()?.trim();
         const tokensUsed = response.usageMetadata?.totalTokenCount || 0;
 
         if (text) {
+          text = text.replace(/\[Source:[^\]]*\]/gi, "").trim();
           return {
             text,
             tokensUsed,

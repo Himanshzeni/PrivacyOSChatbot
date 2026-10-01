@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect } from "react";
-import { Bot, User, Sparkles, BookOpen, ChevronRight, HelpCircle } from "lucide-react";
+import { Bot, User, Sparkles, ChevronRight, HelpCircle } from "lucide-react";
 
 export interface MessageItem {
   id: string;
@@ -139,20 +139,7 @@ export function MessageList({
                 <FormattedContent content={msg.content} />
               )}
 
-              {/* Source citations tag */}
-              {!isUser && msg.sources && msg.sources.length > 0 && (
-                <div className="mt-2.5 pt-2 border-t border-slate-100 flex flex-wrap gap-1">
-                  {msg.sources.map((s, idx) => (
-                    <span
-                      key={idx}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#EFF6FF] border border-blue-200/60 text-[9px] font-mono text-[#1D4ED8]"
-                    >
-                      <BookOpen className="w-2.5 h-2.5 text-[#1D4ED8]" />
-                      <span>{s.citation}</span>
-                    </span>
-                  ))}
-                </div>
-              )}
+
 
               {/* Soft Enquiry Prompt if strongly detected */}
               {!isUser && msg.suggestSoftEnquiry && (

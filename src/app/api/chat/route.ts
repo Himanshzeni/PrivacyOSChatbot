@@ -120,15 +120,18 @@ export async function POST(req: Request) {
       // Analytics non-blocking
     }
 
+    // Clean any remaining citation tags or bracketed sources
+    const cleanResponseText = aiResponse.text
+      .replace(/\[Source:[^\]]*\]/gi, "")
+      .replace(/\[https?:\/\/[^\]]*\]/gi, "")
+      .trim();
+
     return NextResponse.json({
-      response: aiResponse.text,
+      response: cleanResponseText,
       conversationId: convId,
       intent: intentResult.level,
       suggestSoftEnquiry: intentResult.suggestSoftEnquiry,
-      sources: retrievedContext.map((c) => ({
-        title: c.title,
-        citation: c.sourceCitation,
-      })),
+      sources: [],
     });
   } catch (error) {
     console.error("[Chat API Route Error]:", error);
