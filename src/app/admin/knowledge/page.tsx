@@ -113,6 +113,11 @@ export default async function KnowledgeAdminPage() {
                     <strong className="text-emerald-900 font-medium">HI:</strong> {item.summaryHindi}
                   </p>
                 )}
+                {item.summaryHinglish && (
+                  <p className="bg-blue-50/50 p-2 rounded-xl border border-blue-100 text-slate-700">
+                    <strong className="text-blue-900 font-medium">HINGLISH:</strong> {item.summaryHinglish}
+                  </p>
+                )}
               </div>
             </div>
           ))}

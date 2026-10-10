@@ -39,22 +39,24 @@ export async function retrieveRelevantKnowledge(query: string): Promise<Retrieve
     for (const item of APPROVED_DPDP_KNOWLEDGE) {
       const matchScoreEn = item.keywords.filter((kw) => normalizedQuery.includes(kw.toLowerCase())).length;
       const matchScoreHi = (item.keywordsHindi || []).filter((kw) => normalizedQuery.includes(kw.toLowerCase())).length;
-      const matchScore = matchScoreEn + matchScoreHi;
+      const matchScoreHinglish = (item.keywordsHinglish || []).filter((kw) => normalizedQuery.includes(kw.toLowerCase())).length;
+      const matchScore = matchScoreEn + matchScoreHi + matchScoreHinglish;
 
       const sectionMatch = normalizedQuery.includes(item.section.toLowerCase());
       const topicWords = item.topic.toLowerCase().split(/\s+/).filter((w) => w.length > 3);
       const topicMatches = topicWords.filter((w) => normalizedQuery.includes(w)).length;
       const topicHiMatches = item.topicHindi && normalizedQuery.includes(item.topicHindi.toLowerCase()) ? 2 : 0;
+      const topicHinglishMatches = item.topicHinglish && normalizedQuery.includes(item.topicHinglish.toLowerCase()) ? 2 : 0;
 
-      if (matchScore > 0 || sectionMatch || topicMatches > 0 || topicHiMatches > 0) {
-        const bilingualContent = item.summaryHindi
-          ? `[English]: ${item.summary}\n[हिन्दी]: ${item.summaryHindi}`
-          : item.summary;
+      if (matchScore > 0 || sectionMatch || topicMatches > 0 || topicHiMatches > 0 || topicHinglishMatches > 0) {
+        const trilingualContent = `[English]: ${item.summary}\n[हिन्दी]: ${item.summaryHindi || item.summary}\n[Hinglish]: ${item.summaryHinglish || item.summary}`;
 
         results.push({
           category: "DPDP_KNOWLEDGE",
-          title: item.topicHindi ? `${item.section}: ${item.topic} (${item.topicHindi})` : `${item.section}: ${item.topic}`,
-          content: bilingualContent,
+          title: item.topicHinglish
+            ? `${item.section}: ${item.topic} | ${item.topicHinglish}`
+            : `${item.section}: ${item.topic}`,
+          content: trilingualContent,
           sourceCitation: item.citation,
           score: 0.8 + matchScore * 0.08 + (sectionMatch ? 0.25 : 0) + topicMatches * 0.05 + topicHiMatches * 0.1,
         });
