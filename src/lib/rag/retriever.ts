@@ -30,24 +30,33 @@ export async function retrieveRelevantKnowledge(query: string): Promise<Retrieve
   const normalizedQuery = query.toLowerCase();
 
   // 1. Check Approved DPDP Knowledge from Gazette of India (Authoritative priority)
-  const isDpdpRelated = /(dpdp|data protection|consent|privacy|fiduciary|penalty|rights|personal data|fine|act 2023|dpo|dpia|cross-border|transfer|children|minor|breach|cert-in|section|sec\b|tdsat|board|nominate|schedule|grievance|notice|erasure|storage limitation)/i.test(
-    normalizedQuery
-  );
+  const isDpdpRelated =
+    /(dpdp|data protection|consent|privacy|fiduciary|penalty|rights|personal data|fine|act 2023|dpo|dpia|cross-border|transfer|children|minor|breach|cert-in|section|sec\b|tdsat|board|nominate|schedule|grievance|notice|erasure|storage limitation|rule\s*\d+|rules\s*2025|gazette|नियम|धारा|डीपीडीपी|उल्लंघन|सहमति|जुर्माना|बच्चे|बालक|अधिकार|बोर्ड|संरक्षण|प्रबंधक|डेटा|फिड्यूशरी|प्रिंसिपल|नोटिस|सुरक्षा|पहचान|डिजिलॉकर|jurmana|sahmati|suchna|ullanghan)/i.test(
+      normalizedQuery
+    );
 
   if (isDpdpRelated) {
     for (const item of APPROVED_DPDP_KNOWLEDGE) {
-      const matchScore = item.keywords.filter((kw) => normalizedQuery.includes(kw)).length;
+      const matchScoreEn = item.keywords.filter((kw) => normalizedQuery.includes(kw.toLowerCase())).length;
+      const matchScoreHi = (item.keywordsHindi || []).filter((kw) => normalizedQuery.includes(kw.toLowerCase())).length;
+      const matchScore = matchScoreEn + matchScoreHi;
+
       const sectionMatch = normalizedQuery.includes(item.section.toLowerCase());
       const topicWords = item.topic.toLowerCase().split(/\s+/).filter((w) => w.length > 3);
       const topicMatches = topicWords.filter((w) => normalizedQuery.includes(w)).length;
+      const topicHiMatches = item.topicHindi && normalizedQuery.includes(item.topicHindi.toLowerCase()) ? 2 : 0;
 
-      if (matchScore > 0 || sectionMatch || topicMatches > 0) {
+      if (matchScore > 0 || sectionMatch || topicMatches > 0 || topicHiMatches > 0) {
+        const bilingualContent = item.summaryHindi
+          ? `[English]: ${item.summary}\n[हिन्दी]: ${item.summaryHindi}`
+          : item.summary;
+
         results.push({
           category: "DPDP_KNOWLEDGE",
-          title: `${item.section}: ${item.topic}`,
-          content: item.summary,
+          title: item.topicHindi ? `${item.section}: ${item.topic} (${item.topicHindi})` : `${item.section}: ${item.topic}`,
+          content: bilingualContent,
           sourceCitation: item.citation,
-          score: 0.8 + matchScore * 0.08 + (sectionMatch ? 0.25 : 0) + topicMatches * 0.05,
+          score: 0.8 + matchScore * 0.08 + (sectionMatch ? 0.25 : 0) + topicMatches * 0.05 + topicHiMatches * 0.1,
         });
       }
     }

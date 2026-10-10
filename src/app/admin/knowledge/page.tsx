@@ -98,8 +98,22 @@ export default async function KnowledgeAdminPage() {
                   {item.citation}
                 </span>
               </div>
-              <h3 className="font-bold text-[#0F172A] text-sm">{item.topic}</h3>
-              <p className="text-slate-600 leading-relaxed text-[11.5px]">{item.summary}</p>
+              <div className="space-y-1">
+                <h3 className="font-bold text-[#0F172A] text-sm">{item.topic}</h3>
+                {item.topicHindi && (
+                  <div className="text-[11px] font-semibold text-emerald-800">
+                    {item.topicHindi}
+                  </div>
+                )}
+              </div>
+              <div className="space-y-1.5 text-slate-600 text-[11.5px] leading-relaxed">
+                <p><strong className="text-slate-800 font-medium">EN:</strong> {item.summary}</p>
+                {item.summaryHindi && (
+                  <p className="bg-emerald-50/50 p-2 rounded-xl border border-emerald-100 text-slate-700">
+                    <strong className="text-emerald-900 font-medium">HI:</strong> {item.summaryHindi}
+                  </p>
+                )}
+              </div>
             </div>
           ))}
         </div>
